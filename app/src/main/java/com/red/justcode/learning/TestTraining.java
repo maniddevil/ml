@@ -32,6 +32,10 @@ public class TestTraining {
 
         int prediction = Utility.predictNextPosition(context, new Integer[] {1,0,-1, 0,1,0, -1,1,-1}, -1);
         Log.i("MANI:", "next prediction prediction="+prediction);
+        int[][] testW = new int[][] {{1,2,3}, {2,3,4}};
+        int[][] testX = new int[][] {{1},{2}, {3}};
+        int[][] output = Utility.multiply(testW, testX);
+        Utility.printMatrix(output);
     }
 
     public void printLookUp(Context context) {

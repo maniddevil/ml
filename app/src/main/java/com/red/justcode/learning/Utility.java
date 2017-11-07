@@ -215,4 +215,52 @@ public class Utility {
         }
         return predictedPosition;
     }
+
+    public static float activationFunction(float f) {
+        //ReLU
+        if(f > 0) {
+            return f;
+        } else {
+            return 0;
+        }
+    }
+
+    public static void printMatrix(int[][] a) {
+        for(int i=0; i<a.length; i++ ){
+            for(int j=0; j<a[0].length; j++) {
+                System.out.print(" "+a[i][j]);
+            }
+            System.out.println();
+        }
+    }
+
+    public static int[][] converToMatrix(int[] a, int m, int n){
+        int[][] result = new int[m][n];
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                result[i][j] = a[i*m +j];
+            }
+        }
+        return result;
+    }
+
+    public static int[][] multiply(int[][] a, int[][] b) {
+        int rowsInA = a.length;
+        int columnsInA = a[0].length;
+        int rowsInB = b.length;
+        int columnsInB = b[0].length;
+        if (columnsInA != rowsInB) {
+            return null;
+        }
+        int[][] c = new int[rowsInA][columnsInB];
+        for (int i = 0; i < rowsInA; i++) {
+            for (int j = 0; j < columnsInB; j++) {
+                for (int k = 0; k < columnsInA; k++) {
+                    c[i][j] = c[i][j] + a[i][k] * b[k][j];
+                }
+            }
+        }
+        return c;
+    }
+
 }
