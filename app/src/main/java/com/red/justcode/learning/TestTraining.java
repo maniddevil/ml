@@ -32,9 +32,9 @@ public class TestTraining {
 
         int prediction = Utility.predictNextPosition(context, new Integer[] {1,0,-1, 0,1,0, -1,1,-1}, -1);
         Log.i("MANI:", "next prediction prediction="+prediction);
-        int[][] testW = new int[][] {{1,2,3}, {2,3,4}};
-        int[][] testX = new int[][] {{1},{2}, {3}};
-        int[][] output = Utility.multiply(testW, testX);
+        double[][] testW = new double[][] {{1,2,3}, {2,3,4}};
+        double[][] testX = new double[][] {{1},{2}, {3}};
+        double[][] output = Utility.multiply(testW, testX);
         Utility.printMatrix(output);
     }
 
@@ -54,5 +54,14 @@ public class TestTraining {
             } while (cursor.moveToNext());
             cursor.close();
         }
+    }
+
+    public void neuralNetworkTests() {
+        NeuralNetwork nn = new NeuralNetwork(9, new int[] {10},9);
+        nn.initWeights(0.5);
+        nn.randomizeWeights();
+        nn.setBias(new int[] {1});
+        int prediction = nn.predictNextMove(new int[] {1,0,-1, 0,1,0, -1,1,-1});
+        Log.i("TestTraining", "neuralNetworkTests: prediction="+prediction);
     }
 }

@@ -16,6 +16,7 @@ public class TttActivity extends AppCompatActivity {
         //MANI For testing purpose, others can comment below code
         TestTraining tt = new TestTraining();
         tt.dummyTest(this);
+        tt.neuralNetworkTests();
         //MANI End
     }
 }

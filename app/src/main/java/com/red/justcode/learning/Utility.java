@@ -169,6 +169,9 @@ public class Utility {
             return;
         }
 
+        //below is not needed actually. Just for testing purpose
+        getInputFromOXCumulatives(x1, x2);
+
         ContentValues values = new ContentValues();
         values.put(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE, x1);
         values.put(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE, x2);
@@ -216,16 +219,16 @@ public class Utility {
         return predictedPosition;
     }
 
-    public static float activationFunction(float f) {
+    public static double activationFunction(double d) {
         //ReLU
-        if(f > 0) {
-            return f;
+        if(d > 0) {
+            return d;
         } else {
             return 0;
         }
     }
 
-    public static void printMatrix(int[][] a) {
+    public static void printMatrix(double[][] a) {
         for(int i=0; i<a.length; i++ ){
             for(int j=0; j<a[0].length; j++) {
                 System.out.print(" "+a[i][j]);
@@ -244,15 +247,16 @@ public class Utility {
         return result;
     }
 
-    public static int[][] multiply(int[][] a, int[][] b) {
+    public static double[][] multiply(double[][] a, double[][] b) {
         int rowsInA = a.length;
         int columnsInA = a[0].length;
         int rowsInB = b.length;
         int columnsInB = b[0].length;
+        Log.i("Utility", "rowsInA="+rowsInA+" columnsInA="+columnsInA+" rowsInB="+rowsInB+" columnsInB="+columnsInB);
         if (columnsInA != rowsInB) {
             return null;
         }
-        int[][] c = new int[rowsInA][columnsInB];
+        double[][] c = new double[rowsInA][columnsInB];
         for (int i = 0; i < rowsInA; i++) {
             for (int j = 0; j < columnsInB; j++) {
                 for (int k = 0; k < columnsInA; k++) {
@@ -261,6 +265,37 @@ public class Utility {
             }
         }
         return c;
+    }
+
+    public static int[] getInputFromOXCumulatives(double ocum, double xcum) {
+        int length = 9;
+        int[] inputArray = new int[length];
+
+        //ocumulative refactor to get array enablings and assign them 1 values
+        double temp = 0;
+        for (int i=0; i<length; i++) {
+            double pow = Math.pow(0.5, i+1);
+            if(ocum >= temp + pow) {
+                inputArray[i] = 1;
+                temp = temp + pow;
+            } else {
+                inputArray[i] = 0;
+            }
+        }
+        //xcumulative refactor to get array enablings and assign them -1 values
+        temp = 0;
+        for(int i=0; i<length; i++) {
+            double pow = Math.pow(0.5, i+1);
+            if(xcum >= temp + pow) {
+                inputArray[i] = -1;
+                temp = temp + pow;
+            }
+        }
+        for(int i=0; i<length; i++) {
+            System.out.print(" "+inputArray[i]);
+        }
+        System.out.println();
+        return inputArray;
     }
 
 }
