@@ -1,10 +1,178 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?><!-- Demonstrates using a relative layout to create a form -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.red.justcode.TttActivity">
+    android:layout_height="match_parent">
 
-</LinearLayout>
-<!-- </android.support.constraint.ConstraintLayout> caused error for me so temperorly-->
+    <RelativeLayout
+        android:id="@+id/rl1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
+
+        <LinearLayout
+            android:id="@+id/ll1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/three"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px"
+                android:padding="0px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/two"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/one"
+                android:layout_width="80dp"
+                android:layout_height="80dp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_alignEnd="@+id/ll1"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/ll1"
+            android:background="#b2beb5" />
+
+        <LinearLayout
+            android:id="@+id/ll2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line1"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/six"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px"
+                android:padding="0px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/five"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/four"
+                android:layout_width="80dp"
+                android:layout_height="80dp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_alignEnd="@+id/ll2"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/ll2"
+            android:background="#b2beb5" />
+
+        <LinearLayout
+            android:id="@+id/ll3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line2"
+            android:orientation="horizontal">
+
+            <View
+                android:id="@+id/nine"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px"
+                android:padding="0px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/eight"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginRight="10px" />
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#b2beb5" />
+
+            <View
+                android:id="@+id/seven"
+                android:layout_width="80dp"
+                android:layout_height="80dp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:text="@string/choose_to_start"
+        android:textStyle="bold|italic"
+        android:textColor="#FF0000"
+        android:textSize="30sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout">
+        <Button
+            android:id="@+id/hvh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/hvh" />
+
+        <Button
+            android:id="@+id/mvh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mvh" />
+    </LinearLayout>
+
+
+</RelativeLayout>

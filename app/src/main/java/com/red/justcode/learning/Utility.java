@@ -69,7 +69,7 @@ public class Utility {
     }
 
     //Later keep below code in non-UI thread
-    public void addStatesToLookupTable(Context context, List<Integer[]> stateList, boolean isDraw) {
+    public static void addStatesToLookupTable(Context context, List<Integer[]> stateList, boolean isDraw) {
         if(null == stateList) {
             return;
         }
@@ -148,13 +148,13 @@ public class Utility {
         }
     }
 
-    private float calculatePreviousStateProbability(float currentStateProb, float learningRate) {
+    private static float calculatePreviousStateProbability(float currentStateProb, float learningRate) {
         float previousStateProb = 0.5f; //previous state prob is unknown, lets keep it 0.5f;
 
         return previousStateProb + (learningRate * (currentStateProb - previousStateProb));
     }
 
-    private void insertOneStateToLookup(Context context, double x1, double x2, float p) {
+    private static void insertOneStateToLookup(Context context, double x1, double x2, float p) {
 
         float previouslyExisitingProbability = -1;
         Cursor cursor = context.getContentResolver().query(TrainingDB.LOOKUP_TABLE.CONTENT_URI,
@@ -330,6 +330,15 @@ public class Utility {
     public static Integer[] getIntegerFromIntArray(int[] a) {
         int length = a.length;
         Integer[] b = new Integer[length];
+        for(int i=0; i< length; i++) {
+            b[i] = a[i];
+        }
+        return b;
+    }
+
+    public static int[] getIntFromIntegerArray(Integer[] a) {
+        int length = a.length;
+        int[] b = new int[length];
         for(int i=0; i< length; i++) {
             b[i] = a[i];
         }

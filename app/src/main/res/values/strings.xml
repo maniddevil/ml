@@ -1,6 +1,12 @@
 <resources>
-    <string name="app_name">TTT</string>
+    <string name="app_name">Tic Tac Toe</string>
+    <string name="hvh">Human Vs Human</string>
+    <string name="mvh">Human Vs Machine</string>
+    <string name="choose_to_start">Choose mode</string>
+    <string name="player_1_move">Player 1 move</string>
+    <string name="player_2_move">Player 2 move</string>
+    <string name="player_1_won">Player 1 WON</string>
+    <string name="player_2_won">Player 2 WON</string>
+    <string name="game_draw">DRAW</string>
 
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
