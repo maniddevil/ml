@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -164,7 +164,7 @@ public class Utility {
         if(null != cursor && cursor.moveToFirst()) {
             previouslyExisitingProbability = cursor.getFloat(0);
         }
-
+        cursor.close();
         if(previouslyExisitingProbability != -1 && previouslyExisitingProbability < p) {
             return;
         }
@@ -193,10 +193,12 @@ public class Utility {
                 return fromCursor;
             }
         }
+        cursor.close();
         return 0.5f; //if not found in db, by default we will give 0.5 as probability of winning
     }
 
     //player is 1 for O and -1 for X, so we can predict the best move for that player
+    //**This is important, with current state for the particular player, what is the best possible position
     public static int predictNextPosition(Context context, Integer[] state, int player) {
         State currentState = new State(state);
 
@@ -296,6 +298,42 @@ public class Utility {
         }
         System.out.println();
         return inputArray;
+    }
+
+/*    public static class TrainData {
+        Integer[] ip;
+        int op;
+        public TrainData(Integer[] ip, int op) {
+            this.ip = ip;
+            this.op = op;
+        }
+    }*/
+
+    public static List<Integer[]> getTrainingData(Context context) {
+        List<Integer[]> list = new ArrayList<Integer[]>();
+        Cursor cursor = context.getContentResolver().query(TrainingDB.LOOKUP_TABLE.CONTENT_URI,
+                null,null,null,null);
+
+        if(null != cursor && cursor.moveToFirst()) {
+            do {
+                double ocum = cursor.getDouble(cursor.getColumnIndex(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE));
+                double xcum = cursor.getDouble(cursor.getColumnIndex(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE));
+                int[] ip = getInputFromOXCumulatives(ocum, xcum);
+                Integer[] input = getIntegerFromIntArray(ip);
+                list.add(input);
+            } while(cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
+
+    public static Integer[] getIntegerFromIntArray(int[] a) {
+        int length = a.length;
+        Integer[] b = new Integer[length];
+        for(int i=0; i< length; i++) {
+            b[i] = a[i];
+        }
+        return b;
     }
 
 }
