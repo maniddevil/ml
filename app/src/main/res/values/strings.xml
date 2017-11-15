@@ -2,6 +2,7 @@
     <string name="app_name">Tic Tac Toe</string>
     <string name="hvh">Human Vs Human</string>
     <string name="mvh">Human Vs Machine</string>
+    <string name="mvn">Machine Vs NNetwork</string>
     <string name="choose_to_start">Choose mode</string>
     <string name="player_1_move">Player 1 move</string>
     <string name="player_2_move">Player 2 move</string>

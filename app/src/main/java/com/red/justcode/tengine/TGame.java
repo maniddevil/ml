@@ -2,6 +2,7 @@ package com.red.justcode.tengine;
 
 import android.util.Log;
 
+import com.red.justcode.MyApplication;
 import com.red.justcode.TttActivity;
 import com.red.justcode.learning.Utility;
 
@@ -44,6 +45,11 @@ public class TGame {
         } else {
             state = stateList.get(stateList.size() - 1).clone();
         }
+        //mani added only to close the game without crash
+        if(pos == -1) {
+            Utility.addStatesToLookupTable(MyApplication.getContext(), stateList, false);
+            return;
+        }
 
         state[pos] = mPlayer1 == currentPlayer ? 1 : -1;
         stateList.add(state);
@@ -52,12 +58,22 @@ public class TGame {
         } else {
             currentPlayer = mPlayer1;
         }
-        isGameOver();
+        boolean[] status = isGameOver();
+        if (status[0]) {
+            Utility.addStatesToLookupTable(MyApplication.getContext(), stateList, status[1]);
+        }
         currentPlayer.makemove();
     }
 
     public void setCurrentPlayer(Player player) {
         currentPlayer = player;
+    }
+
+    public Integer[] getCurrentState() {
+        if(stateList.isEmpty()) {
+            return new Integer[] {0,0,0, 0,0,0, 0,0,0};
+        }
+        return stateList.get(stateList.size()-1);
     }
 
     public Player getCurrentPlayer() {
@@ -103,9 +119,7 @@ public class TGame {
                 isDraw = true;
             }
         }
-        if (gameOver) {
-            Utility.addStatesToLookupTable(activity.getApplicationContext(), stateList, isDraw);
-        }
+
         return new boolean[]{gameOver,isDraw};
     }
 

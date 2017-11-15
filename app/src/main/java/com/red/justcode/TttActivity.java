@@ -12,6 +12,7 @@ import com.red.justcode.tengine.HPlayer;
 import com.red.justcode.tengine.MlPlayer;
 import com.red.justcode.tengine.Player;
 import com.red.justcode.tengine.TGame;
+import com.red.justcode.learning.TestTraining;
 
 public class TttActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -21,9 +22,7 @@ public class TttActivity extends AppCompatActivity implements View.OnClickListen
     TextView mStatusView;
     Button mBtn_HvH, mBtn_Mvh;
 
-
     TGame mTgame;
-
 
     /**
      * Called when the activity is first created.
@@ -38,6 +37,11 @@ public class TttActivity extends AppCompatActivity implements View.OnClickListen
         mBtn_Mvh = (Button) findViewById(R.id.mvh);
         mBtn_HvH.setOnClickListener(this);
         mBtn_Mvh.setOnClickListener(this);
+		//MANI For testing purpose, others can comment below code
+        //TestTraining tt = new TestTraining();
+        //tt.dummyTest(this);
+        //tt.neuralNetworkTests(this);
+        //MANI End
     }
 
     public void nextmove() {
@@ -81,6 +85,9 @@ public class TttActivity extends AppCompatActivity implements View.OnClickListen
     }
 
     public void nextmove(int pos) {
+        if(pos == -1) {
+            return;
+        }
         int x = (pos / 3);
         int y = (pos - 3 * x) + 1;
         x = x + 1;
@@ -89,12 +96,12 @@ public class TttActivity extends AppCompatActivity implements View.OnClickListen
                 mStatusView.setText(getResources().getString(R.string.player_1_move));
                 b[x][y].setEnabled(false);
                 b[x][y].setBackground(getResources().getDrawable(R.drawable.o));
-                //mTgame.nextMove(3*(x-1)+(y-1));
+                mTgame.nextMove(3*(x-1)+(y-1));
             } else {
                 mStatusView.setText(getResources().getString(R.string.player_2_move));
                 b[x][y].setEnabled(false);
                 b[x][y].setBackground(getResources().getDrawable(R.drawable.x));
-                //mTgame.nextMove(3*(x-1)+(y-1));
+                mTgame.nextMove(3*(x-1)+(y-1));
             }
         }
 
@@ -166,7 +173,8 @@ public class TttActivity extends AppCompatActivity implements View.OnClickListen
             mTgame.setPlayers(mPlayer1, mPlayer2);
         } else if (view.getId() == R.id.mvh) {
             mPlayer1 = new HPlayer(this);
-            mPlayer2 = new MlPlayer(this);
+            mPlayer2 = new MlPlayer(this,mTgame);
+            MlPlayer.isTraining = false;
             mTgame.setPlayers(mPlayer1, mPlayer2);
         }
         mStatusView.setText(getResources().getString(R.string.player_1_move));

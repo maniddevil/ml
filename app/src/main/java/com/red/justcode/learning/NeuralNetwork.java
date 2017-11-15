@@ -18,6 +18,7 @@ public class NeuralNetwork {
     private double[] mBias;
 
     private double[][][] mWeights;
+    private double[][] mOuts = new double[3][];
 
     public NeuralNetwork(int inputCount, int[] hiddenNeuronsCount, int outputCount) {
         mInputCount = inputCount;
@@ -25,6 +26,29 @@ public class NeuralNetwork {
         mOutpoutCount = outputCount;
     }
 
+
+    public void randomizeWeights() {
+        double random;
+        mWeights = new double[2][][];
+        for(int i=0; i<mWeights.length; i++) {
+            int jlength = 10;
+            mWeights[i] = new double[jlength][];
+            for(int j=0; j<jlength; j++) {
+                int klength ;
+                if(i==1) {
+                    klength = 9;
+                } else {
+                    klength = 10;
+                }
+                mWeights[i][j] = new double[klength];
+                for(int k=0; k< klength; k++) {
+                    mWeights[i][j][k] = Math.random();
+                }
+            }
+        }
+    }
+
+/*
     public void randomizeWeights() {
         double random;
         mWeights = new double[mHiddenNeuronsCount.length +1][][];
@@ -39,7 +63,7 @@ public class NeuralNetwork {
                 }
             }
         }
-    }
+    }*/
 
     public void initWeights(double d) {
         double random;
@@ -82,7 +106,7 @@ public class NeuralNetwork {
             Log.i("NeuralNetwork", "predictNextMove printing matrix with bias");
             Utility.printMatrix(op);
 
-            applyReLU(op);
+            applyActivationFunction(op);
         }
 
         return maxValuePosition(op);
@@ -109,7 +133,7 @@ public class NeuralNetwork {
         return position+1;
     }
 
-    public void applyReLU(double[][] op) {
+    public void applyActivationFunction(double[][] op) {
         for(int i=0; i<op.length; i++) {
             op[i][0] = Utility.activationFunction(op[i][0]);
         }
@@ -142,20 +166,33 @@ public class NeuralNetwork {
 
     ///////////////////////////////////////////////////////////////////////////
     ///////////////TRAINING////////////////////////////////////////////////////
-    public void trainNetwork(Context context, List<Integer[]> trainingList){
+    public void trainNetwork(Context context, List<Integer[]> trainingList) {
         int length = trainingList.size();
         for(int i=0; i<length; i++) {
             int player = 1;
             int op = Utility.predictNextPosition(context, trainingList.get(i), player);
             if(op != -1) {
                 train(integerToIntArrayWithPlayer(trainingList.get(i), player), op);
+                printTrainingData(trainingList.get(i), player, op);
             }
+
             player = -1;
             op = Utility.predictNextPosition(context, trainingList.get(i), player);
             if(op != -1) {
+                printTrainingData(trainingList.get(i), player, op);
                 train(integerToIntArrayWithPlayer(trainingList.get(i), player), op);
             }
         }
+    }
+
+    public void printTrainingData(Integer[] ip, int player, int op) {
+        System.out.println();
+        System.out.print("ip-player-op: ip");
+        for(int i=0; i<ip.length; i++) {
+            System.out.print(" "+ip[i]);
+        }
+        System.out.print(" player "+player+" op "+op);
+        System.out.println();
     }
 
     public int[] integerToIntArrayWithPlayer(Integer[] ip, int player) {
@@ -168,22 +205,70 @@ public class NeuralNetwork {
         return intArray;
     }
 
+    private double[] tempHOut = new double[10];
     public void train(int[] input, int op) {
         int[] targetOutput = getOutputArrayFromPosition(op);
         double[] predictedOutput = predictOutput(input);
-        double error = squaredError(targetOutput, predictedOutput);
-        Log.i("NeuralNetwork", "train: error="+error);
+        mOuts[2] = predictedOutput;
+        double totalError = squaredError(targetOutput, predictedOutput);
+        Log.i("NeuralNetwork", "train: totalError="+totalError);
+
+        for(int i=mWeights.length-1; i>=0; i--) {//neurons layer. 2 bridges between ip##hidden & hidden##op
+            for(int j=mWeights[i].length-1; j>=0; j--) {//as many neurons in a layer
+                for(int k=mWeights[i][j].length-1; k>=0; k--) {//one neuron to many output neuron weights
+                    double delta;
+                    if(i==1) {//this is hidden to output layer weights
+                        delta = findDeltaWeightChangeOfOutputLayer(targetOutput[k], mOuts[2][k], mOuts[1][k]);
+                    } else {//this is input to hidden layer weights
+                        delta = findDeltaWeightChangeOfHiddenLayer(predictedOutput, targetOutput, i, j, mOuts[1][j],mOuts[0][j]);
+                    }
+                    float learningRate = 0.2f;
+                    mWeights[i][j][k] = mWeights[i][j][k] - (learningRate * delta);
+                }
+            }
+        }
+        printWeights();
+
     }
+
+    private void printWeights() {
+        System.out.println("---------------PRINTING weights");
+        for (int i = mWeights.length - 1; i >= 0; i--) {
+            for (int j = mWeights[i].length - 1; j >= 0; j--) {
+                for (int k = mWeights[i][j].length - 1; k >= 0; k--) {
+                    System.out.print(" "+mWeights[i][j][k]);
+                    System.out.println();
+                }
+            }
+        }
+        System.out.println("---------------PRINTING weights DONE");
+    }
+
+    public double findDeltaWeightChangeOfOutputLayer(double expectedOp,
+                                                     double predictedOp, double previousLayerOp) {
+        return -(expectedOp - predictedOp) * predictedOp * (1 - predictedOp) * previousLayerOp;
+    }
+
+    public double findDeltaWeightChangeOfHiddenLayer(double[] predictedOutput, int[] expectedOutput,
+                                                     int layer, int neuron, double predictedOp, double previousLayerOp) {
+        double sum = 0;
+        for(int i=0; i<9; i++) {//should be actually 10
+            sum = sum + ((predictedOutput[i] - expectedOutput[i]) * predictedOutput[i] * (1-predictedOutput[i]) * mWeights[layer][neuron][i]);
+        }
+        return predictedOp * (1-predictedOp) * previousLayerOp * sum;
+    }
+
+
 
     public double squaredError(int[] targetOp, double[] predictedOp) {
 
-        double error = 0;
+        double totalError = 0;
         for(int i=0; i<targetOp.length; i++) {
-            // error = 1/2 * (target - predicted) power 2 -> repeated over all outputs in array
-            error = error + ((Math.pow(targetOp[i] - predictedOp[i], 2)) / 2);
+            // totalError = 1/2 * (target - predicted) power 2 -> repeated over all outputs in array
+            totalError = totalError + ((Math.pow(targetOp[i] - predictedOp[i], 2)) / 2);
         }
 
-        return error;
+        return totalError;
     }
 
     private int[] getOutputArrayFromPosition(int position) {
@@ -191,7 +276,8 @@ public class NeuralNetwork {
         for(int i=0; i<mOutpoutCount; i++) {
             output[i] = 0;
         }
-        output[position-1] = 1;
+        //output[position-1] = 1;//check once this or below one is correct
+        output[position] = 1;
         return output;
     }
 
@@ -201,8 +287,10 @@ public class NeuralNetwork {
         for(int i=0; i<mHiddenNeuronsCount.length+1; i++) {
             if (i == 0) {
                 ip = convertToDoubleArray(input);
+                mOuts[i] = convertToSingleArray(ip);
             } else {
                 ip = op;
+                mOuts[i] = convertToSingleArray(op);
             }
 
             op = Utility.multiply(mWeights[i], ip);
@@ -211,14 +299,9 @@ public class NeuralNetwork {
             addBias(op, mBias[i]);
             Log.i("NeuralNetwork", "predictNextMove printing matrix with bias");
             Utility.printMatrix(op);
-
-            applyReLU(op);
+            applyActivationFunction(op);
         }
 
         return convertToSingleArray(op);
     }
-
-
 }
-
-

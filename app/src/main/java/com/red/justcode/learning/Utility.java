@@ -5,14 +5,21 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.red.justcode.tengine.MlPlayer;
+import com.red.justcode.tengine.NNPlayer;
+import com.red.justcode.tengine.TGame;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by manidhar on 11/4/2017.
  */
 
 public class Utility {
+
+    public static final double e = 2.718;
 
     //NOTE: TODO: yet to remove the symmetric states. study on how to rotate & mirror the matrix
 
@@ -146,6 +153,9 @@ public class Utility {
             insertOneStateToLookup(context, state.getOCumulativeState(),
                     state.getXCumulativeState(), winProbability);
         }
+        //Only for creating training data, remove once used
+        //Utility.prepareTrainingData();
+        //Utility.prepareTrainingData2();
     }
 
     private static float calculatePreviousStateProbability(float currentStateProb, float learningRate) {
@@ -166,17 +176,29 @@ public class Utility {
         }
         cursor.close();
         if(previouslyExisitingProbability != -1 && previouslyExisitingProbability < p) {
+            Log.i("Utility", "insertOneStateToLookup: returning without ADDING");
             return;
         }
 
-        //below is not needed actually. Just for testing purpose
-        getInputFromOXCumulatives(x1, x2);
+        if(previouslyExisitingProbability != -1) {
+            getInputFromOXCumulatives(x1, x2);
+            ContentValues values = new ContentValues();
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE, x1);
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE, x2);
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_PROBABILITY, p);
+            context.getContentResolver().update(TrainingDB.LOOKUP_TABLE.CONTENT_URI, values,
+                    TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE+"=? AND "+TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE+"=? ",
+                    new String[] {String.valueOf(x1), String.valueOf(x2)});
+        } else {
+            //below is not needed actually. Just for testing purpose
+            getInputFromOXCumulatives(x1, x2);
 
-        ContentValues values = new ContentValues();
-        values.put(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE, x1);
-        values.put(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE, x2);
-        values.put(TrainingDB.LOOKUP_TABLE.COLUMN_PROBABILITY, p);
-        context.getContentResolver().insert(TrainingDB.LOOKUP_TABLE.CONTENT_URI, values);
+            ContentValues values = new ContentValues();
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE, x1);
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE, x2);
+            values.put(TrainingDB.LOOKUP_TABLE.COLUMN_PROBABILITY, p);
+            context.getContentResolver().insert(TrainingDB.LOOKUP_TABLE.CONTENT_URI, values);
+        }
     }
 
     public static float getProbabilityFromLookup(Context context, State state) {
@@ -198,10 +220,20 @@ public class Utility {
     }
 
     //player is 1 for O and -1 for X, so we can predict the best move for that player
-    //**This is important, with current state for the particular player, what is the best possible position
+    //**This is importanfalset, with current state for the particular player, what is the best possible position
     public static int predictNextPosition(Context context, Integer[] state, int player) {
         State currentState = new State(state);
-
+        boolean isNewState = true;
+        for(int i=0; i<state.length; i++) {
+            if(state[i]!=0){
+                isNewState = false;
+                break;
+            }
+        }
+        if(isNewState) {
+            Random rand = new Random();
+            return rand.nextInt(9);
+        }
         int predictedPosition = -1;
         float predictedPositionProbability = 0;
         int[] stateArray = currentState.state;
@@ -218,16 +250,25 @@ public class Utility {
                 }
             }
         }
+        System.out.println();
+        System.out.print("state-player-output-");
+        for(int i=0; i<currentState.stateLength; i++) {
+            System.out.print(" "+currentState.state[i]);
+        }
+        System.out.print(" player "+player+" prediction="+predictedPosition);
+        System.out.println();
         return predictedPosition;
     }
 
     public static double activationFunction(double d) {
-        //ReLU
+/*        //ReLU
         if(d > 0) {
             return d;
         } else {
             return 0;
-        }
+        }*/
+        //softplus
+        return 1/(1 + Math.pow(e, -d));
     }
 
     public static void printMatrix(double[][] a) {
@@ -249,7 +290,18 @@ public class Utility {
         return result;
     }
 
-    public static double[][] multiply(double[][] a, double[][] b) {
+    public static double[][] transpose(double[][] a){
+        double[][] T = new double[a[0].length][a.length];
+        for(int i=0; i<a.length; i++) {
+            for(int j=0; j<a[0].length; j++) {
+                T[j][i] = a[i][j];
+            }
+        }
+        return T;
+    }
+
+    public static double[][] multiply(double[][] a1, double[][] b) {
+        double[][] a = transpose(a1);
         int rowsInA = a.length;
         int columnsInA = a[0].length;
         int rowsInB = b.length;
@@ -313,12 +365,13 @@ public class Utility {
         List<Integer[]> list = new ArrayList<Integer[]>();
         Cursor cursor = context.getContentResolver().query(TrainingDB.LOOKUP_TABLE.CONTENT_URI,
                 null,null,null,null);
-
         if(null != cursor && cursor.moveToFirst()) {
+            Log.i("Utility", "cursor count="+cursor.getCount());
             do {
                 double ocum = cursor.getDouble(cursor.getColumnIndex(TrainingDB.LOOKUP_TABLE.COLUMN_O_STATE));
                 double xcum = cursor.getDouble(cursor.getColumnIndex(TrainingDB.LOOKUP_TABLE.COLUMN_x_STATE));
                 int[] ip = getInputFromOXCumulatives(ocum, xcum);
+                Log.i("Utility", "ocum="+ocum+ " xcum="+xcum);
                 Integer[] input = getIntegerFromIntArray(ip);
                 list.add(input);
             } while(cursor.moveToNext());
@@ -343,6 +396,26 @@ public class Utility {
             b[i] = a[i];
         }
         return b;
+    }
+
+    //////////Prepare trainig data
+    public static void prepareTrainingData() {
+        TGame mTgame = new TGame(null);
+        MlPlayer player1 = new MlPlayer(mTgame);
+        MlPlayer player2 = new MlPlayer(mTgame);
+        player1.isTraining = true;
+        mTgame.setPlayers(player1, player2);
+        mTgame.startPlay();
+    }
+
+    public static void prepareTrainingData2() {
+        TGame tGame = new TGame(null);
+        NNPlayer player1 = new NNPlayer(tGame);
+        MlPlayer player2 = new MlPlayer(tGame);
+        player1.isTraining = true;
+        player2.isTraining = true;
+        tGame.setPlayers(player1, player2);
+        tGame.startPlay();
     }
 
 }

@@ -35,7 +35,7 @@ public class TestTraining {
         double[][] testW = new double[][] {{1,2,3}, {2,3,4}};
         double[][] testX = new double[][] {{1},{2}, {3}};
         double[][] output = Utility.multiply(testW, testX);
-        Utility.printMatrix(output);
+        //Utility.printMatrix(output);
     }
 
     public void printLookUp(Context context) {
@@ -60,9 +60,9 @@ public class TestTraining {
         NeuralNetwork nn = new NeuralNetwork(10, new int[] {10},9);
         nn.initWeights(0.5);
         nn.randomizeWeights();
-        nn.setBias(new double[] {1,1});
+        nn.setBias(new double[] {0.2,0.2});
         nn.trainNetwork(context, Utility.getTrainingData(context));
-        int prediction = nn.predictNextMove(new int[] {1, 1,0,-1, 0,1,0, -1,1,-1});
-        Log.i("TestTraining", "neuralNetworkTests: prediction="+prediction);
+        //int prediction = nn.predictNextMove(new int[] {1, 1,0,-1, 0,1,0, -1,1,-1});
+        //Log.i("TestTraining", "neuralNetworkTests: prediction="+prediction);
     }
 }
